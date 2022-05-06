@@ -16,16 +16,16 @@ param location string = resourceGroup().location
 ])
 param environmentType string
 
-@description('Indicates whether to deploy the storage account for toy manuals.')
-param deployToyManualsStorageAccount bool
+@description('Indicates whether to deploy the storage account.')
+param deployLiveDemoStorageAccount bool
 
 @description('A unique suffix to add to resource names that need to be globally unique.')
 @maxLength(13)
 param resourceNameSuffix string = uniqueString(resourceGroup().id)
 
-var appServiceAppName = 'toy-website-${resourceNameSuffix}'
-var appServicePlanName = 'toy-website-plan'
-var toyManualsStorageAccountName = 'toyweb${resourceNameSuffix}'
+var appServiceAppName = 'live-demo-website-${resourceNameSuffix}'
+var appServicePlanName = 'live-demo-website-plan'
+var liveDemoStorageAccountName = 'live-demo${resourceNameSuffix}'
 
 // Define the SKUs for each component based on the environment type.
 var environmentConfigurationMap = {
@@ -36,7 +36,7 @@ var environmentConfigurationMap = {
         capacity: 1
       }
     }
-    toyManualsStorageAccount: {
+    liveDemoStorageAccount: {
       sku: {
         name: 'Standard_LRS'
       }
@@ -49,14 +49,14 @@ var environmentConfigurationMap = {
         capacity: 2
       }
     }
-    toyManualsStorageAccount: {
+    liveDemoStorageAccount: {
       sku: {
         name: 'Standard_ZRS'
       }
     }
   }
 }
-var toyManualsStorageAccountConnectionString = deployToyManualsStorageAccount ? 'DefaultEndpointsProtocol=https;AccountName=${toyManualsStorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${toyManualsStorageAccount.listKeys().keys[0].value}' : ''
+var liveDemoStorageAccountConnectionString = deployLiveDemoStorageAccount ? 'DefaultEndpointsProtocol=https;AccountName=${liveDemoStorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${liveDemoStorageAccount.listKeys().keys[0].value}' : ''
 
 resource appServicePlan 'Microsoft.Web/serverFarms@2020-06-01' = {
   name: appServicePlanName
@@ -73,19 +73,19 @@ resource appServiceApp 'Microsoft.Web/sites@2020-06-01' = {
     siteConfig: {
       appSettings: [
         {
-          name: 'ToyManualsStorageAccountConnectionString'
-          value: toyManualsStorageAccountConnectionString
+          name: 'LiveDemoStorageAccountConnectionString'
+          value: liveDemoStorageAccountConnectionString
         }
       ]
     }
   }
 }
 
-resource toyManualsStorageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = if (deployToyManualsStorageAccount) {
-  name: toyManualsStorageAccountName
+resource liveDemoStorageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' = if (deployLiveDemoStorageAccount) {
+  name: liveDemoStorageAccountName
   location: resourceGroup().location
   kind: 'StorageV2'
-  sku: environmentConfigurationMap[environmentType].toyManualsStorageAccount.sku
+  sku: environmentConfigurationMap[environmentType].liveDemoStorageAccount.sku
 }
 ```
 - In the VS Code terminal, run the following commands:
@@ -98,4 +98,39 @@ git push
 ## Step 2: Replace the Pipeline Steps
 
 - In VS Code, open the deploy/azure-pipelines.yml file
-- 
+- Remove the last 2 lines in your YAML file and add a task that uses the az deployment group create command:
+```
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+- job:
+  steps:
+  
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: $(ServiceConnectionName)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az deployment group create \
+          --name $(Build.BuildNumber) \
+          --resource-group $(ResourceGroupName) \
+          --template-file deploy/main.bicep \
+          --parameters environmentType=$(EnvironmentType) deployLiveDemoStorageAccount=$(DeployLiveDemoStorageAccount)
+```
+- in VS Code, run:
+```
+git add deploy/azure-pipelines.yml
+git commit -m 'Add Azure CLI tasks to pipeline'
+git push
+```
+## Step 3: Add Pipeline Variables
+
+- In [Azure DevOps](https://dev.azure.com/) , go to Pipelines tab
+- Select your Pipeline and click on Edit
+- Select Variables and click on New Variable
+- use the following Variables:
+  - 
