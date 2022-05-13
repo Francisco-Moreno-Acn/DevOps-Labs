@@ -124,7 +124,7 @@ jobs:
 - in VS Code, run:
 ```
 git add deploy/azure-pipelines.yml
-git commit -m 'Add Azure CLI tasks to pipeline'
+git commit -m "Add Azure CLI tasks to pipeline"
 git push
 ```
 ## Step 3: Add Pipeline Variables
