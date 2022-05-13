@@ -91,7 +91,7 @@ resource liveDemoStorageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' =
 - In the VS Code terminal, run the following commands:
 ```
 git add deploy/main.bicep
-git commit -m 'Add Bicep file'
+git commit -m "Add Bicep file"
 git push
 ```
 
