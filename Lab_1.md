@@ -33,7 +33,7 @@ jobs:
 - job:
   steps:
   - script: echo Hello world!
-    displayName: 'Placeholder step'"
+    displayName: 'Placeholder step'
 ```
 
 - Open a Bash Terminal
