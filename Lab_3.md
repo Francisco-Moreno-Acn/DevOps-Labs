@@ -120,7 +120,7 @@ pool: Self-Hosted
 variables: 
   buildConfiguration: 'Release' 
 
-  resourceGroupName: 'PipelineDevOpsLabGroup2'
+  resourceGroupName: 'PipelineDevOpsLab'
   azureServiceConnection: 'AzureConnection'
   deployment: 'deployment1'
   templateFile: 'main.bicep'
