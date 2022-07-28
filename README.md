@@ -1,6 +1,9 @@
 # CI/CD With Azure DevOps 
 
 ## Contribuitors: ##
-Josué García 
+
+Josué García
+
 Edgar Rivas
+
 Francisco Moreno
